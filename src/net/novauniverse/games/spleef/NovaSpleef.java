@@ -14,8 +14,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import net.novauniverse.games.spleef.game.Spleef;
 import net.novauniverse.games.spleef.mapmodules.SpleefConfigMapModule;
+import net.novauniverse.games.spleef.mapmodules.SpleefGiveProjectiles;
+import net.novauniverse.games.spleef.mapmodules.mapdecay.SpleefMapDecay;
 import net.zeeraa.novacore.commons.log.Log;
 import net.zeeraa.novacore.spigot.abstraction.events.VersionIndependantPlayerAchievementAwardedEvent;
+import net.zeeraa.novacore.spigot.language.LanguageReader;
 import net.zeeraa.novacore.spigot.module.ModuleManager;
 import net.zeeraa.novacore.spigot.module.modules.compass.CompassTracker;
 import net.zeeraa.novacore.spigot.module.modules.compass.event.CompassTrackingEvent;
@@ -47,12 +50,19 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 	public Spleef getGame() {
 		return game;
 	}
-	
+
 	@Override
 	public void onEnable() {
 		NovaSpleef.instance = this;
 
 		saveDefaultConfig();
+		
+		Log.info("Loading language files...");
+		try {
+			LanguageReader.readFromJar(this.getClass(), "/lang/en-us.json");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		allowReconnect = getConfig().getBoolean("allow_reconnect");
 		reconnectTime = getConfig().getInt("player_elimination_delay");
@@ -71,15 +81,19 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 			Bukkit.getPluginManager().disablePlugin(this);
 			return;
 		}
-		
+
 		// Register map modules
 		MapModuleManager.addMapModule("spleef.config", SpleefConfigMapModule.class);
-		MapModuleManager.addMapModule("spleef.add_preojectiles", SpleefConfigMapModule.class);
+		MapModuleManager.addMapModule("spleef.add_projectiles", SpleefGiveProjectiles.class);
+		MapModuleManager.addMapModule("spleef.map_dacay", SpleefMapDecay.class);
 
 		// Enable required modules
 		ModuleManager.enable(GameManager.class);
 		ModuleManager.enable(GameLobby.class);
 		ModuleManager.enable(CompassTracker.class);
+
+		// All players have compasses so strict mode is not needed
+		CompassTracker.getInstance().setStrictMode(false);
 
 		// Init game and maps
 		this.game = new Spleef();

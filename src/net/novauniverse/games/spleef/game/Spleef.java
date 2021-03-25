@@ -7,28 +7,55 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import net.novauniverse.games.spleef.NovaSpleef;
 import net.novauniverse.games.spleef.mapmodules.SpleefConfigMapModule;
+import net.novauniverse.games.spleef.mapmodules.mapdecay.SpleefMapDecay;
 import net.zeeraa.novacore.commons.log.Log;
+import net.zeeraa.novacore.commons.timers.TickCallback;
+import net.zeeraa.novacore.commons.utils.Callback;
 import net.zeeraa.novacore.spigot.NovaCore;
+import net.zeeraa.novacore.spigot.language.LanguageManager;
 import net.zeeraa.novacore.spigot.module.modules.game.GameEndReason;
 import net.zeeraa.novacore.spigot.module.modules.game.MapGame;
 import net.zeeraa.novacore.spigot.module.modules.game.elimination.PlayerQuitEliminationAction;
+import net.zeeraa.novacore.spigot.module.modules.game.map.mapmodule.MapModule;
+import net.zeeraa.novacore.spigot.timers.BasicTimer;
+import net.zeeraa.novacore.spigot.utils.ItemBuilder;
 import net.zeeraa.novacore.spigot.utils.PlayerUtils;
+import net.zeeraa.novacore.spigot.utils.RandomFireworkEffect;
 
 public class Spleef extends MapGame implements Listener {
 	private boolean started;
 	private boolean ended;
+
+	private final int countdownTime = 10;
+	private boolean countdownOver;
+
+	private SpleefMapDecay decayModule;
 
 	private SpleefConfigMapModule config;
 
@@ -36,6 +63,8 @@ public class Spleef extends MapGame implements Listener {
 		this.started = false;
 		this.ended = false;
 		this.config = null;
+		this.countdownOver = false;
+		this.decayModule = null;
 	}
 
 	public SpleefConfigMapModule getConfig() {
@@ -92,6 +121,10 @@ public class Spleef extends MapGame implements Listener {
 		return true;
 	}
 
+	public SpleefMapDecay getDecayModule() {
+		return decayModule;
+	}
+	
 	public void tpToSpectator(Player player) {
 		NovaCore.getInstance().getVersionIndependentUtils().resetEntityMaxHealth(player);
 		player.setHealth(20);
@@ -117,6 +150,13 @@ public class Spleef extends MapGame implements Listener {
 		player.setFoodLevel(20);
 		player.teleport(location);
 		player.setGameMode(GameMode.SURVIVAL);
+
+		player.getInventory().setItem(8, Spleef.getTrackingCompassItem());
+		player.getInventory().setItem(0, config.getToolItemStack());
+	}
+
+	public static final ItemStack getTrackingCompassItem() {
+		return new ItemBuilder(Material.COMPASS).setName(ChatColor.GOLD + "" + ChatColor.BOLD + "Tracking compass").build();
 	}
 
 	@Override
@@ -168,7 +208,54 @@ public class Spleef extends MapGame implements Listener {
 			tpToArena(toTeleport.remove(0), toUse.remove(0));
 		}
 
-		sendBeginEvent();
+		BasicTimer startTimer = new BasicTimer(countdownTime, 20L);
+		startTimer.addFinishCallback(new Callback() {
+			@Override
+			public void execute() {
+				countdownOver = true;
+
+				for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1F, 2F);
+				}
+
+				sendBeginEvent();
+			}
+		});
+
+		startTimer.addTickCallback(new TickCallback() {
+			@Override
+			public void execute(long timeLeft) {
+				for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1F, 1.3F);
+					if (NovaCore.getInstance().getActionBar() != null) {
+						NovaCore.getInstance().getActionBar().sendMessage(player, LanguageManager.getString(player, "novacore.game.starting_in", timeLeft));
+					}
+				}
+
+				if (NovaCore.getInstance().getActionBar() == null) {
+					LanguageManager.broadcast("novacore.game.starting_in", timeLeft);
+				} else {
+					Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "Starting in: " + ChatColor.AQUA + ChatColor.BOLD + timeLeft);
+				}
+			}
+		});
+
+		startTimer.start();
+
+		// Disable drops
+		getActiveMap().getWorld().setGameRuleValue("doTileDrops", "false");
+
+		MapModule decayMapModule = getActiveMap().getMapData().getMapModule(SpleefMapDecay.class);
+		if (decayMapModule != null) {
+			decayModule = (SpleefMapDecay) decayMapModule;
+		}
+	}
+	
+	private boolean isBlockDecaying(Material material) {
+		if(decayModule != null) {
+			return decayModule.getDecaySteps().contains(material);
+		}
+		return false;
 	}
 
 	@Override
@@ -177,16 +264,55 @@ public class Spleef extends MapGame implements Listener {
 			return;
 		}
 
+		for (Location location : getActiveMap().getStarterLocations()) {
+			Firework fw = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK);
+			FireworkMeta fwm = fw.getFireworkMeta();
+
+			fwm.setPower(2);
+			fwm.addEffect(RandomFireworkEffect.randomFireworkEffect());
+
+			fw.setFireworkMeta(fwm);
+		}
+
+		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+			p.setHealth(p.getMaxHealth());
+			p.setFoodLevel(20);
+			PlayerUtils.clearPlayerInventory(p);
+			PlayerUtils.resetPlayerXP(p);
+			p.setGameMode(GameMode.SPECTATOR);
+			p.playSound(p.getLocation(), Sound.WITHER_DEATH, 1F, 1F);
+		}
+
 		ended = true;
 	}
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent e) {
-		if (e.getDamager().getType() == EntityType.SNOWBALL) {
-			return;
+		if (e.getEntity() instanceof Player) {
+			if (!countdownOver) {
+				e.setCancelled(true);
+			}
+
+			if (e.getDamager().getType() == EntityType.SNOWBALL) {
+				return;
+			}
 		}
 
 		e.setCancelled(true);
+	}
+
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	public void onEntityDamage(EntityDamageEvent e) {
+		if (e.getEntity() instanceof Player) {
+
+			if (!countdownOver) {
+				e.setCancelled(true);
+			}
+
+			if (e.getCause() == DamageCause.FALL) {
+				e.setCancelled(true);
+			}
+		}
 	}
 
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
@@ -195,11 +321,14 @@ public class Spleef extends MapGame implements Listener {
 			return;
 		}
 
-		if (config.getBreakableBlocks().contains(e.getBlock().getType())) {
-			return;
-		}
-
 		e.setCancelled(true);
+	}
+
+	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+	public void onBlockFade(BlockFadeEvent e) {
+		if (hasStarted()) {
+			e.setCancelled(true);
+		}
 	}
 
 	@EventHandler(priority = EventPriority.NORMAL)
@@ -207,6 +336,56 @@ public class Spleef extends MapGame implements Listener {
 		if (hasStarted()) {
 			if (!players.contains(e.getPlayer().getUniqueId())) {
 				tpToSpectator(e.getPlayer());
+			}
+		}
+	}
+
+	@EventHandler(priority = EventPriority.NORMAL)
+	public void onPlayerDeath(PlayerDeathEvent e) {
+		if (hasStarted()) {
+			e.setKeepInventory(true);
+			e.getEntity().getInventory().clear();
+		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onPlayerRespawn(PlayerRespawnEvent e) {
+		if (hasStarted()) {
+			e.setRespawnLocation(getActiveMap().getSpectatorLocation());
+
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					if (e.getPlayer().isOnline()) {
+						tpToSpectator(e.getPlayer());
+					}
+				}
+			}.runTaskLater(NovaSpleef.getInstance(), 1L);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+	public void onPlayerDropItem(PlayerDropItemEvent e) {
+		if (hasStarted()) {
+			if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+				e.setCancelled(true);
+			}
+		}
+	}
+
+	@EventHandler(priority = EventPriority.NORMAL)
+	public void onPlayerInteract(PlayerInteractEvent e) {
+		if (hasStarted()) {
+			if (countdownOver) {
+				if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+					if (players.contains(e.getPlayer().getUniqueId())) {
+						if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+							if (config.getBreakableBlocks().contains(e.getClickedBlock().getType()) || isBlockDecaying(e.getClickedBlock().getType())) {
+								e.getClickedBlock().breakNaturally(NovaCore.getInstance().getVersionIndependentUtils().getItemInMainHand(e.getPlayer()));
+							}
+						}
+					}
+				}
 			}
 		}
 	}

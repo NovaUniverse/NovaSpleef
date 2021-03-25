@@ -1,0 +1,3 @@
+allow_reconnect: true
+
+player_elimination_delay: 180

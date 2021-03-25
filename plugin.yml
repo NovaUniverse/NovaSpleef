@@ -1,0 +1,6 @@
+name: NovaSpleef
+main: net.novauniverse.games.spleef.NovaSpleef
+description: Novauniverse Spleef
+version: 1.0
+depend: [NovaCore]
+softdepend: [NovaGamesTarget]

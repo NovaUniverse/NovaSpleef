@@ -13,8 +13,8 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import net.novauniverse.games.spleef.game.Spleef;
-import net.novauniverse.games.spleef.mapmodules.SpleefConfigMapModule;
-import net.novauniverse.games.spleef.mapmodules.SpleefGiveProjectiles;
+import net.novauniverse.games.spleef.mapmodules.config.SpleefConfigMapModule;
+import net.novauniverse.games.spleef.mapmodules.giveprojectiles.SpleefGiveProjectiles;
 import net.novauniverse.games.spleef.mapmodules.mapdecay.SpleefMapDecay;
 import net.zeeraa.novacore.commons.log.Log;
 import net.zeeraa.novacore.spigot.abstraction.events.VersionIndependantPlayerAchievementAwardedEvent;

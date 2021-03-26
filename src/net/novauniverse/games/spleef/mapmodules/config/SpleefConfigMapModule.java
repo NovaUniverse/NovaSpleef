@@ -1,4 +1,4 @@
-package net.novauniverse.games.spleef.mapmodules;
+package net.novauniverse.games.spleef.mapmodules.config;
 
 import java.util.ArrayList;
 import java.util.HashMap;

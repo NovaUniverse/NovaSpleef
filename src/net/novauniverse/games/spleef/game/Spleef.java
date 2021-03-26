@@ -32,7 +32,7 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import net.novauniverse.games.spleef.NovaSpleef;
-import net.novauniverse.games.spleef.mapmodules.SpleefConfigMapModule;
+import net.novauniverse.games.spleef.mapmodules.config.SpleefConfigMapModule;
 import net.novauniverse.games.spleef.mapmodules.mapdecay.SpleefMapDecay;
 import net.zeeraa.novacore.commons.log.Log;
 import net.zeeraa.novacore.commons.tasks.Task;

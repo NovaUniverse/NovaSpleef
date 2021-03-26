@@ -1,4 +1,4 @@
-package net.novauniverse.games.spleef.mapmodules;
+package net.novauniverse.games.spleef.mapmodules.giveprojectiles;
 
 import java.util.UUID;
 

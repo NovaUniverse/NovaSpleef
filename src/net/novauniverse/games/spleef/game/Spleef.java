@@ -35,6 +35,7 @@ import net.novauniverse.games.spleef.NovaSpleef;
 import net.novauniverse.games.spleef.mapmodules.SpleefConfigMapModule;
 import net.novauniverse.games.spleef.mapmodules.mapdecay.SpleefMapDecay;
 import net.zeeraa.novacore.commons.log.Log;
+import net.zeeraa.novacore.commons.tasks.Task;
 import net.zeeraa.novacore.commons.timers.TickCallback;
 import net.zeeraa.novacore.commons.utils.Callback;
 import net.zeeraa.novacore.spigot.NovaCore;
@@ -43,6 +44,7 @@ import net.zeeraa.novacore.spigot.module.modules.game.GameEndReason;
 import net.zeeraa.novacore.spigot.module.modules.game.MapGame;
 import net.zeeraa.novacore.spigot.module.modules.game.elimination.PlayerQuitEliminationAction;
 import net.zeeraa.novacore.spigot.module.modules.game.map.mapmodule.MapModule;
+import net.zeeraa.novacore.spigot.tasks.SimpleTask;
 import net.zeeraa.novacore.spigot.timers.BasicTimer;
 import net.zeeraa.novacore.spigot.utils.ItemBuilder;
 import net.zeeraa.novacore.spigot.utils.PlayerUtils;
@@ -58,6 +60,8 @@ public class Spleef extends MapGame implements Listener {
 	private SpleefMapDecay decayModule;
 
 	private SpleefConfigMapModule config;
+	
+	private Task gameLoop;
 
 	public Spleef() {
 		this.started = false;
@@ -249,6 +253,17 @@ public class Spleef extends MapGame implements Listener {
 		if (decayMapModule != null) {
 			decayModule = (SpleefMapDecay) decayMapModule;
 		}
+		
+		gameLoop = new SimpleTask(new Runnable() {
+			@Override
+			public void run() {
+				for(Player player : Bukkit.getServer().getOnlinePlayers()) {
+					player.setFoodLevel(20);
+					player.setSaturation(20);
+				}
+			}
+		}, 20L);
+		gameLoop.start();
 	}
 	
 	private boolean isBlockDecaying(Material material) {
@@ -263,6 +278,8 @@ public class Spleef extends MapGame implements Listener {
 		if (ended) {
 			return;
 		}
+		
+		Task.tryStopTask(gameLoop);
 
 		for (Location location : getActiveMap().getStarterLocations()) {
 			Firework fw = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK);

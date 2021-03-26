@@ -139,6 +139,10 @@ public class SpleefMapDecay extends MapModule {
 		return startTrigger;
 	}
 	
+	public int getBeginAfter() {
+		return beginAfter;
+	}
+	
 	@Override
 	public void onGameStart(Game game) {
 		game.addTrigger(trigger);

@@ -19,6 +19,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
@@ -385,6 +386,15 @@ public class Spleef extends MapGame implements Listener {
 	public void onPlayerDropItem(PlayerDropItemEvent e) {
 		if (hasStarted()) {
 			if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+				e.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled =  true)
+	public void onBlockPlace(BlockPlaceEvent e) {
+		if(hasStarted()) {
+			if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
 				e.setCancelled(true);
 			}
 		}

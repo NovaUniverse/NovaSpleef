@@ -86,6 +86,7 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 		MapModuleManager.addMapModule("spleef.config", SpleefConfigMapModule.class);
 		MapModuleManager.addMapModule("spleef.add_projectiles", SpleefGiveProjectiles.class);
 		MapModuleManager.addMapModule("spleef.map_dacay", SpleefMapDecay.class);
+		//MapModuleManager.addMapModule("spleef.projectile_break_blocks", ProjectilesBreakBlocks.class);
 
 		// Enable required modules
 		ModuleManager.enable(GameManager.class);

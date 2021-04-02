@@ -9,6 +9,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
@@ -23,6 +24,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -61,7 +63,7 @@ public class Spleef extends MapGame implements Listener {
 	private SpleefMapDecay decayModule;
 
 	private SpleefConfigMapModule config;
-	
+
 	private Task gameLoop;
 
 	public Spleef() {
@@ -129,7 +131,7 @@ public class Spleef extends MapGame implements Listener {
 	public SpleefMapDecay getDecayModule() {
 		return decayModule;
 	}
-	
+
 	public void tpToSpectator(Player player) {
 		NovaCore.getInstance().getVersionIndependentUtils().resetEntityMaxHealth(player);
 		player.setHealth(20);
@@ -153,11 +155,18 @@ public class Spleef extends MapGame implements Listener {
 		player.setHealth(player.getMaxHealth());
 		player.setSaturation(20);
 		player.setFoodLevel(20);
-		player.teleport(location);
 		player.setGameMode(GameMode.SURVIVAL);
+		player.teleport(location);
 
 		player.getInventory().setItem(8, Spleef.getTrackingCompassItem());
 		player.getInventory().setItem(0, config.getToolItemStack());
+
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				player.teleport(location);
+			}
+		}.runTaskLater(NovaSpleef.getInstance(), 10L);
 	}
 
 	public static final ItemStack getTrackingCompassItem() {
@@ -254,11 +263,11 @@ public class Spleef extends MapGame implements Listener {
 		if (decayMapModule != null) {
 			decayModule = (SpleefMapDecay) decayMapModule;
 		}
-		
+
 		gameLoop = new SimpleTask(new Runnable() {
 			@Override
 			public void run() {
-				for(Player player : Bukkit.getServer().getOnlinePlayers()) {
+				for (Player player : Bukkit.getServer().getOnlinePlayers()) {
 					player.setFoodLevel(20);
 					player.setSaturation(20);
 				}
@@ -266,12 +275,20 @@ public class Spleef extends MapGame implements Listener {
 		}, 20L);
 		gameLoop.start();
 	}
-	
-	private boolean isBlockDecaying(Material material) {
-		if(decayModule != null) {
+
+	public boolean isBlockDecaying(Material material) {
+		if (decayModule != null) {
 			return decayModule.getDecaySteps().contains(material);
 		}
 		return false;
+	}
+
+	public boolean canBreakBlock(Block block) {
+		return canBreakBlock(block.getType());
+	}
+
+	public boolean canBreakBlock(Material material) {
+		return config.getBreakableBlocks().contains(material) || isBlockDecaying(material);
 	}
 
 	@Override
@@ -279,7 +296,7 @@ public class Spleef extends MapGame implements Listener {
 		if (ended) {
 			return;
 		}
-		
+
 		Task.tryStopTask(gameLoop);
 
 		for (Location location : getActiveMap().getStarterLocations()) {
@@ -349,6 +366,15 @@ public class Spleef extends MapGame implements Listener {
 		}
 	}
 
+	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+	public void onInventoryClick(InventoryClickEvent e) {
+		if(hasStarted()) {
+			if(e.getWhoClicked().getGameMode() != GameMode.CREATIVE) {
+				e.setCancelled(true);
+			}
+		}
+	}
+
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		if (hasStarted()) {
@@ -390,11 +416,11 @@ public class Spleef extends MapGame implements Listener {
 			}
 		}
 	}
-	
-	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled =  true)
+
+	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
 	public void onBlockPlace(BlockPlaceEvent e) {
-		if(hasStarted()) {
-			if(e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+		if (hasStarted()) {
+			if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
 				e.setCancelled(true);
 			}
 		}
@@ -407,7 +433,7 @@ public class Spleef extends MapGame implements Listener {
 				if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
 					if (players.contains(e.getPlayer().getUniqueId())) {
 						if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
-							if (config.getBreakableBlocks().contains(e.getClickedBlock().getType()) || isBlockDecaying(e.getClickedBlock().getType())) {
+							if (canBreakBlock(e.getClickedBlock())) {
 								e.getClickedBlock().breakNaturally(NovaCore.getInstance().getVersionIndependentUtils().getItemInMainHand(e.getPlayer()));
 							}
 						}

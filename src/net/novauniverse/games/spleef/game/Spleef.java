@@ -8,7 +8,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
@@ -42,6 +41,8 @@ import net.zeeraa.novacore.commons.tasks.Task;
 import net.zeeraa.novacore.commons.timers.TickCallback;
 import net.zeeraa.novacore.commons.utils.Callback;
 import net.zeeraa.novacore.spigot.NovaCore;
+import net.zeeraa.novacore.spigot.abstraction.VersionIndependantUtils;
+import net.zeeraa.novacore.spigot.abstraction.enums.VersionIndependantSound;
 import net.zeeraa.novacore.spigot.language.LanguageManager;
 import net.zeeraa.novacore.spigot.module.modules.game.GameEndReason;
 import net.zeeraa.novacore.spigot.module.modules.game.MapGame;
@@ -229,7 +230,7 @@ public class Spleef extends MapGame implements Listener {
 				countdownOver = true;
 
 				for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1F, 2F);
+					VersionIndependantUtils.get().playSound(player, player.getLocation(), VersionIndependantSound.NOTE_PLING, 1F, 1F);
 				}
 
 				sendBeginEvent();
@@ -240,7 +241,7 @@ public class Spleef extends MapGame implements Listener {
 			@Override
 			public void execute(long timeLeft) {
 				for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1F, 1.3F);
+					VersionIndependantUtils.get().playSound(player, player.getLocation(), VersionIndependantSound.NOTE_PLING, 1F, 1.3F);
 					if (NovaCore.getInstance().getActionBar() != null) {
 						NovaCore.getInstance().getActionBar().sendMessage(player, LanguageManager.getString(player, "novacore.game.starting_in", timeLeft));
 					}
@@ -315,7 +316,7 @@ public class Spleef extends MapGame implements Listener {
 			PlayerUtils.clearPlayerInventory(p);
 			PlayerUtils.resetPlayerXP(p);
 			p.setGameMode(GameMode.SPECTATOR);
-			p.playSound(p.getLocation(), Sound.WITHER_DEATH, 1F, 1F);
+			VersionIndependantUtils.get().playSound(p, p.getLocation(), VersionIndependantSound.WITHER_DEATH, 1F, 1F);
 		}
 
 		ended = true;

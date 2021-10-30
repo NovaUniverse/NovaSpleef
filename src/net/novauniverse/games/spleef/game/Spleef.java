@@ -3,6 +3,8 @@ package net.novauniverse.games.spleef.game;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -31,6 +33,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import net.novauniverse.games.spleef.NovaSpleef;
@@ -55,6 +58,8 @@ import net.zeeraa.novacore.spigot.utils.PlayerUtils;
 import net.zeeraa.novacore.spigot.utils.RandomFireworkEffect;
 
 public class Spleef extends MapGame implements Listener {
+	public static final String[] TOOL_LORE_EASER_EGGS = { "IKEA\nSANDIG 20:-\nSpade, blå\n16:- exkl. moms\nUtgår inom kort\n\n\nHey how do i remove\nthe price tag from this?", "Zeeraa Approved!", "Try not to fall into the lava"};
+
 	private boolean started;
 	private boolean ended;
 
@@ -159,8 +164,32 @@ public class Spleef extends MapGame implements Listener {
 		player.setGameMode(GameMode.SURVIVAL);
 		player.teleport(location);
 
+		ItemStack tool = config.getToolItemStack();
+
+		if (NovaSpleef.getInstance().isEnableEasterEggLores()) {
+			Random random = new Random();
+			if (random.nextInt(4) == 1) {
+				String selected = TOOL_LORE_EASER_EGGS[random.nextInt(TOOL_LORE_EASER_EGGS.length)];
+
+				ItemMeta toolMeta = tool.getItemMeta();
+				List<String> lore;
+
+				if (toolMeta.hasLore()) {
+					lore = toolMeta.getLore();
+				} else {
+					lore = new ArrayList<>();
+				}
+				for (String s : selected.split("\n")) {
+					lore.add(s);
+				}
+				toolMeta.setLore(lore);
+				tool.setItemMeta(toolMeta);
+
+			}
+		}
+
 		player.getInventory().setItem(8, Spleef.getTrackingCompassItem());
-		player.getInventory().setItem(0, config.getToolItemStack());
+		player.getInventory().setItem(0, tool);
 
 		new BukkitRunnable() {
 			@Override
@@ -369,8 +398,8 @@ public class Spleef extends MapGame implements Listener {
 
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
 	public void onInventoryClick(InventoryClickEvent e) {
-		if(hasStarted()) {
-			if(e.getWhoClicked().getGameMode() != GameMode.CREATIVE) {
+		if (hasStarted()) {
+			if (e.getWhoClicked().getGameMode() != GameMode.CREATIVE) {
 				e.setCancelled(true);
 			}
 		}

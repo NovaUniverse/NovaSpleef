@@ -1,3 +1,5 @@
 allow_reconnect: true
 
 player_elimination_delay: 180
+
+enable_easter_egg_lores: true

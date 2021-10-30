@@ -36,6 +36,7 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 
 	private boolean allowReconnect;
 	private int reconnectTime;
+	private boolean enableEasterEggLores;
 
 	private Spleef game;
 
@@ -50,13 +51,17 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 	public Spleef getGame() {
 		return game;
 	}
+	
+	public boolean isEnableEasterEggLores() {
+		return enableEasterEggLores;
+	}
 
 	@Override
 	public void onEnable() {
 		NovaSpleef.instance = this;
 
 		saveDefaultConfig();
-		
+
 		Log.info("Loading language files...");
 		try {
 			LanguageReader.readFromJar(this.getClass(), "/lang/en-us.json");
@@ -66,6 +71,7 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 
 		allowReconnect = getConfig().getBoolean("allow_reconnect");
 		reconnectTime = getConfig().getInt("player_elimination_delay");
+		enableEasterEggLores = getConfig().getBoolean("enable_easter_egg_lores");
 
 		// Create files and folders
 		File mapFolder = new File(this.getDataFolder().getPath() + File.separator + "Maps");
@@ -86,7 +92,8 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 		MapModuleManager.addMapModule("spleef.config", SpleefConfigMapModule.class);
 		MapModuleManager.addMapModule("spleef.add_projectiles", SpleefGiveProjectiles.class);
 		MapModuleManager.addMapModule("spleef.map_dacay", SpleefMapDecay.class);
-		//MapModuleManager.addMapModule("spleef.projectile_break_blocks", ProjectilesBreakBlocks.class);
+		// MapModuleManager.addMapModule("spleef.projectile_break_blocks",
+		// ProjectilesBreakBlocks.class);
 
 		// Enable required modules
 		ModuleManager.enable(GameManager.class);

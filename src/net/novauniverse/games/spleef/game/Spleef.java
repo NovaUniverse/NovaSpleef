@@ -58,7 +58,7 @@ import net.zeeraa.novacore.spigot.utils.PlayerUtils;
 import net.zeeraa.novacore.spigot.utils.RandomFireworkEffect;
 
 public class Spleef extends MapGame implements Listener {
-	public static final String[] TOOL_LORE_EASER_EGGS = { "IKEA\nSANDIG 20:-\nSpade, blå\n16:- exkl. moms\nUtgår inom kort\n\n\nHey how do i remove\nthe price tag from this?", "Zeeraa Approved!", "Try not to fall into the lava"};
+	public static final String[] TOOL_LORE_EASER_EGGS = { "IKEA\nSANDIG 20:-\nSpade, blå\n16:- exkl. moms\nUtgår inom kort\n\n\nHey how do i remove\nthe price tag from this?", "Zeeraa Approved!", "Try not to fall into the lava" };
 
 	private boolean started;
 	private boolean ended;
@@ -195,6 +195,18 @@ public class Spleef extends MapGame implements Listener {
 			@Override
 			public void run() {
 				player.teleport(location);
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						player.teleport(location);
+						new BukkitRunnable() {
+							@Override
+							public void run() {
+								player.teleport(location);
+							}
+						}.runTaskLater(NovaSpleef.getInstance(), 10L);
+					}
+				}.runTaskLater(NovaSpleef.getInstance(), 10L);
 			}
 		}.runTaskLater(NovaSpleef.getInstance(), 10L);
 	}

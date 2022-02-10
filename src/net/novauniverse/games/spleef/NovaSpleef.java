@@ -11,12 +11,15 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import net.novauniverse.games.spleef.game.Spleef;
 import net.novauniverse.games.spleef.mapmodules.config.SpleefConfigMapModule;
 import net.novauniverse.games.spleef.mapmodules.giveprojectiles.SpleefGiveProjectiles;
 import net.novauniverse.games.spleef.mapmodules.mapdecay.SpleefMapDecay;
 import net.zeeraa.novacore.commons.log.Log;
+import net.zeeraa.novacore.commons.utils.JSONFileUtils;
 import net.zeeraa.novacore.spigot.abstraction.events.VersionIndependantPlayerAchievementAwardedEvent;
 import net.zeeraa.novacore.spigot.language.LanguageReader;
 import net.zeeraa.novacore.spigot.module.ModuleManager;
@@ -76,6 +79,26 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 		// Create files and folders
 		File mapFolder = new File(this.getDataFolder().getPath() + File.separator + "Maps");
 		File worldFolder = new File(this.getDataFolder().getPath() + File.separator + "Worlds");
+		
+		File mapOverrides = new File(this.getDataFolder().getPath() + File.separator + "map_overrides.json");
+		if (mapOverrides.exists()) {
+			Log.info("Trying to read map overrides file");
+			try {
+				JSONObject mapFiles = JSONFileUtils.readJSONObjectFromFile(mapOverrides);
+
+				boolean relative = mapFiles.getBoolean("relative");
+
+				mapFolder = new File((relative ? this.getDataFolder().getPath() + File.separator : "") + mapFiles.getString("maps_folder"));
+				worldFolder = new File((relative ? this.getDataFolder().getPath() + File.separator : "") + mapFiles.getString("worlds_folder"));
+
+				Log.info("New paths:");
+				Log.info("Map folder: " + mapFolder.getAbsolutePath());
+				Log.info("World folder: " + worldFolder.getAbsolutePath());
+			} catch (JSONException | IOException e) {
+				e.printStackTrace();
+				Log.error("Failed to read map overrides from file " + mapOverrides.getAbsolutePath());
+			}
+		}
 
 		try {
 			FileUtils.forceMkdir(getDataFolder());

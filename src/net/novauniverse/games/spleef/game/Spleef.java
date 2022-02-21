@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Difficulty;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -222,6 +223,8 @@ public class Spleef extends MapGame implements Listener {
 		}
 		started = true;
 
+		world.setDifficulty(Difficulty.PEACEFUL);
+		
 		SpleefConfigMapModule cfg = (SpleefConfigMapModule) this.getActiveMap().getMapData().getMapModule(SpleefConfigMapModule.class);
 		if (cfg == null) {
 			Log.fatal("Spleef", "The map " + this.getActiveMap().getMapData().getMapName() + " has no spleef config map module");

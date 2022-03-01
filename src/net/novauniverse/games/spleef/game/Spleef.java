@@ -74,6 +74,7 @@ public class Spleef extends MapGame implements Listener {
 	private Task gameLoop;
 
 	public Spleef() {
+		super(NovaSpleef.getInstance());
 		this.started = false;
 		this.ended = false;
 		this.config = null;
@@ -224,7 +225,7 @@ public class Spleef extends MapGame implements Listener {
 		started = true;
 
 		world.setDifficulty(Difficulty.PEACEFUL);
-		
+
 		SpleefConfigMapModule cfg = (SpleefConfigMapModule) this.getActiveMap().getMapData().getMapModule(SpleefConfigMapModule.class);
 		if (cfg == null) {
 			Log.fatal("Spleef", "The map " + this.getActiveMap().getMapData().getMapName() + " has no spleef config map module");

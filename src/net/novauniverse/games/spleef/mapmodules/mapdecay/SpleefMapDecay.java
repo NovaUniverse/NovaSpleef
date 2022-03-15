@@ -7,15 +7,19 @@ import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import net.novauniverse.games.spleef.mapmodules.mapdecay.material.ColoredSpleefMaterial;
+import net.novauniverse.games.spleef.mapmodules.mapdecay.material.ISpleefMaterial;
+import net.novauniverse.games.spleef.mapmodules.mapdecay.material.NormalSpleefMaterial;
 import net.zeeraa.novacore.commons.utils.RandomGenerator;
+import net.zeeraa.novacore.spigot.abstraction.enums.ColoredBlockType;
 import net.zeeraa.novacore.spigot.language.LanguageManager;
 import net.zeeraa.novacore.spigot.module.modules.game.Game;
 import net.zeeraa.novacore.spigot.module.modules.game.GameManager;
@@ -34,7 +38,7 @@ public class SpleefMapDecay extends MapModule {
 	private List<VectorArea> floors;
 	private List<Material> floorBlocks;
 
-	private List<Material> decaySteps;
+	private List<ISpleefMaterial> decaySteps;
 
 	private RepeatingGameTrigger trigger;
 	private DelayedGameTrigger startTrigger;
@@ -71,7 +75,16 @@ public class SpleefMapDecay extends MapModule {
 
 		JSONArray decayStepsJson = json.getJSONArray("dacay_steps");
 		for (int i = 0; i < decayStepsJson.length(); i++) {
-			decaySteps.add(Material.valueOf(decayStepsJson.getString(i)));
+			String material = decayStepsJson.getString(i);
+			if (material.startsWith("COLOREDBLOCK:")) {
+				String[] data = material.split(":");
+				ColoredBlockType type = ColoredBlockType.valueOf(data[1]);
+				DyeColor color = DyeColor.valueOf(data[2]);
+
+				decaySteps.add(new ColoredSpleefMaterial(color, type));
+			} else {
+				decaySteps.add(new NormalSpleefMaterial(Material.valueOf(material)));
+			}
 		}
 
 		beginAfter = json.getInt("begin_after");
@@ -90,9 +103,8 @@ public class SpleefMapDecay extends MapModule {
 		startTrigger = new DelayedGameTrigger("novauniverse.spleef.begin_map_decay", beginAfter * 20L, new TriggerCallback() {
 			@Override
 			public void run(GameTrigger trigger2, TriggerFlag reason) {
-				for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1F, 1F);
-				}
+				Bukkit.getServer().getOnlinePlayers().forEach(player -> player.playSound(player.getLocation(), Sound.NOTE_PLING, 1F, 1F));
+
 				LanguageManager.broadcast("spleef.begin_decay");
 
 				trigger.start();
@@ -131,23 +143,23 @@ public class SpleefMapDecay extends MapModule {
 		return decayingBlocks;
 	}
 
-	public List<Material> getDecaySteps() {
+	public List<ISpleefMaterial> getDecaySteps() {
 		return decaySteps;
 	}
 
 	public DelayedGameTrigger getStartTrigger() {
 		return startTrigger;
 	}
-	
+
 	public int getBeginAfter() {
 		return beginAfter;
 	}
-	
+
 	@Override
 	public void onGameStart(Game game) {
 		game.addTrigger(trigger);
 		game.addTrigger(startTrigger);
-		
+
 		startTrigger.start();
 	}
 
@@ -156,14 +168,14 @@ public class SpleefMapDecay extends MapModule {
 		while (testLocation.getBlock().getType() == Material.AIR && testLocation.getBlockY() > 1) {
 			testLocation.add(0, -1, 0);
 		}
-		
+
 		return testLocation;
 	}
 
 	public void decay() {
 		World world = GameManager.getInstance().getActiveGame().getWorld();
 
-		for (VectorArea floor : floors) {
+		floors.forEach(floor -> {
 			for (int i = 0; i < attemptsPerFloor; i++) {
 				for (int j = 0; j < extraAttempsOnFail; j++) {
 					Location location = LocationUtils.getLocation(world, floor.getRandomVectorWithin(random));
@@ -173,9 +185,9 @@ public class SpleefMapDecay extends MapModule {
 					}
 				}
 			}
-		}
+		});
 
-		for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+		Bukkit.getServer().getOnlinePlayers().forEach(player -> {
 			if (GameManager.getInstance().getActiveGame().getPlayers().contains(player.getUniqueId())) {
 				/*
 				 * Decay rate under players can be changed here by modifying the random numbers
@@ -186,48 +198,45 @@ public class SpleefMapDecay extends MapModule {
 						for (int i = 0; i < 3; i++) {
 							Location groundLocation = getGroundLocation(player.getLocation().clone().add(RandomGenerator.generateDouble(-1, 1), 0, RandomGenerator.generateDouble(-1, 1)));
 
-							for (VectorArea floor : floors) {
+							floors.forEach(floor -> {
 								if (floor.isInsideBlock(groundLocation.toVector())) {
-									tryDecay(groundLocation);
-									break;
+									this.tryDecay(groundLocation);
 								}
-							}
+							});
 						}
 					}
 				}
 			}
-		}
-
+		});
+		
 		List<Location> toRemove = new ArrayList<Location>();
 
-		int stageSize = decaySteps.size();
+		final int stageSize = decaySteps.size();
 
-		for (Location location : decayingBlocks.keySet()) {
+		decayingBlocks.keySet().forEach(location -> {
 			MapDecayData data = decayingBlocks.get(location);
 
 			if (location.getBlock().getType() != data.getLastMaterial()) {
 				// Block has been broken
 				toRemove.add(location);
-				continue;
+				return;
 			}
 
 			if (data.getStage() >= stageSize) {
 				toRemove.add(location);
 				location.getBlock().breakNaturally();
-				continue;
+				return;
 			}
 
-			Material newMaterial = decaySteps.get(data.getStage());
+			// Material newMaterial = decaySteps.get(data.getStage());
+			// location.getBlock().setType(newMaterial);
+			decaySteps.get(data.getStage()).setBlock(location.getBlock());
 
-			location.getBlock().setType(newMaterial);
-
-			data.setLastMaterial(newMaterial);
+			data.setLastMaterial(location.getBlock().getType());
 			data.setStage(data.getStage() + 1);
-		}
+		});
 
-		for (Location location : toRemove) {
-			decayingBlocks.remove(location);
-		}
+		toRemove.forEach(location -> decayingBlocks.remove(location));
 	}
 
 	private boolean tryDecay(Location location) {

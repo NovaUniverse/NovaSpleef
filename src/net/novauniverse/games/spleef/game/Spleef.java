@@ -55,6 +55,7 @@ import net.zeeraa.novacore.spigot.module.modules.game.map.mapmodule.MapModule;
 import net.zeeraa.novacore.spigot.tasks.SimpleTask;
 import net.zeeraa.novacore.spigot.timers.BasicTimer;
 import net.zeeraa.novacore.spigot.utils.ItemBuilder;
+import net.zeeraa.novacore.spigot.utils.LocationUtils;
 import net.zeeraa.novacore.spigot.utils.PlayerUtils;
 import net.zeeraa.novacore.spigot.utils.RandomFireworkEffect;
 
@@ -322,20 +323,39 @@ public class Spleef extends MapGame implements Listener {
 		gameLoop.start();
 	}
 
-	public boolean isBlockDecaying(Material material) {
+	/*
+	 * public boolean isBlockDecaying(Material material) { if (decayModule != null)
+	 * {
+	 * 
+	 * return decayModule.getDecaySteps().contains(material); } return false; }
+	 */
+
+	public boolean isBlockDecaying(Block block) {
 		if (decayModule != null) {
-			return decayModule.getDecaySteps().contains(material);
+			for(Location location : decayModule.getDecayingBlocks().keySet()) {
+				if(LocationUtils.isSameBlock(location, block.getLocation())) {
+					return true;
+				}
+			}
 		}
+
 		return false;
 	}
 
 	public boolean canBreakBlock(Block block) {
-		return canBreakBlock(block.getType());
+		//Log.debug("this.isBlockDecaying(block)", "" + this.isBlockDecaying(block));
+		if (this.isBlockDecaying(block)) {
+			return true;
+		}
+
+		return config.getBreakableBlocks().contains(block.getType());
 	}
 
-	public boolean canBreakBlock(Material material) {
-		return config.getBreakableBlocks().contains(material) || isBlockDecaying(material);
-	}
+	/*
+	 * public boolean canBreakBlock(Material material) { return
+	 * config.getBreakableBlocks().contains(material) || isBlockDecaying(material);
+	 * }
+	 */
 
 	@Override
 	public void onEnd(GameEndReason reason) {

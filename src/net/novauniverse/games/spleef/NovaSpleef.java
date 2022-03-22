@@ -54,7 +54,7 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 	public Spleef getGame() {
 		return game;
 	}
-	
+
 	public boolean isEnableEasterEggLores() {
 		return enableEasterEggLores;
 	}
@@ -65,7 +65,7 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 
 		saveDefaultConfig();
 
-		Log.info("Loading language files...");
+		Log.info(getName(), "Loading language files...");
 		try {
 			LanguageReader.readFromJar(this.getClass(), "/lang/en-us.json");
 		} catch (Exception e) {
@@ -79,10 +79,10 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 		// Create files and folders
 		File mapFolder = new File(this.getDataFolder().getPath() + File.separator + "Maps");
 		File worldFolder = new File(this.getDataFolder().getPath() + File.separator + "Worlds");
-		
+
 		File mapOverrides = new File(this.getDataFolder().getPath() + File.separator + "map_overrides.json");
 		if (mapOverrides.exists()) {
-			Log.info("Trying to read map overrides file");
+			Log.info(getName(), "Trying to read map overrides file");
 			try {
 				JSONObject mapFiles = JSONFileUtils.readJSONObjectFromFile(mapOverrides);
 
@@ -91,12 +91,12 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 				mapFolder = new File((relative ? this.getDataFolder().getPath() + File.separator : "") + mapFiles.getString("maps_folder"));
 				worldFolder = new File((relative ? this.getDataFolder().getPath() + File.separator : "") + mapFiles.getString("worlds_folder"));
 
-				Log.info("New paths:");
-				Log.info("Map folder: " + mapFolder.getAbsolutePath());
-				Log.info("World folder: " + worldFolder.getAbsolutePath());
+				Log.info(getName(), "New paths:");
+				Log.info(getName(), "Map folder: " + mapFolder.getAbsolutePath());
+				Log.info(getName(), "World folder: " + worldFolder.getAbsolutePath());
 			} catch (JSONException | IOException e) {
 				e.printStackTrace();
-				Log.error("Failed to read map overrides from file " + mapOverrides.getAbsolutePath());
+				Log.error(getName(), "Failed to read map overrides from file " + mapOverrides.getAbsolutePath());
 			}
 		}
 
@@ -106,7 +106,7 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 			FileUtils.forceMkdir(worldFolder);
 		} catch (IOException e1) {
 			e1.printStackTrace();
-			Log.fatal("Skywars", "Failed to setup data directory");
+			Log.fatal(getName(), "Failed to setup data directory");
 			Bukkit.getPluginManager().disablePlugin(this);
 			return;
 		}
@@ -140,7 +140,7 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 		Bukkit.getServer().getPluginManager().registerEvents(mapSelector, this);
 
 		// Read maps
-		Log.info("Skywars", "Loading maps from " + mapFolder.getPath());
+		Log.info(getName(), "Loading maps from " + mapFolder.getPath());
 		GameManager.getInstance().getMapReader().loadAll(mapFolder, worldFolder);
 	}
 

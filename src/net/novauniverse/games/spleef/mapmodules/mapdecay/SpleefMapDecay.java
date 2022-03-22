@@ -10,7 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -20,6 +19,7 @@ import net.novauniverse.games.spleef.mapmodules.mapdecay.material.ISpleefMateria
 import net.novauniverse.games.spleef.mapmodules.mapdecay.material.NormalSpleefMaterial;
 import net.zeeraa.novacore.commons.utils.RandomGenerator;
 import net.zeeraa.novacore.spigot.abstraction.enums.ColoredBlockType;
+import net.zeeraa.novacore.spigot.abstraction.enums.VersionIndependantSound;
 import net.zeeraa.novacore.spigot.language.LanguageManager;
 import net.zeeraa.novacore.spigot.module.modules.game.Game;
 import net.zeeraa.novacore.spigot.module.modules.game.GameManager;
@@ -103,7 +103,7 @@ public class SpleefMapDecay extends MapModule {
 		startTrigger = new DelayedGameTrigger("novauniverse.spleef.begin_map_decay", beginAfter * 20L, new TriggerCallback() {
 			@Override
 			public void run(GameTrigger trigger2, TriggerFlag reason) {
-				Bukkit.getServer().getOnlinePlayers().forEach(player -> player.playSound(player.getLocation(), Sound.NOTE_PLING, 1F, 1F));
+				Bukkit.getServer().getOnlinePlayers().forEach(player -> VersionIndependantSound.NOTE_PLING.play(player, player.getLocation(), 1F, 1F));
 
 				LanguageManager.broadcast("spleef.begin_decay");
 
@@ -208,7 +208,7 @@ public class SpleefMapDecay extends MapModule {
 				}
 			}
 		});
-		
+
 		List<Location> toRemove = new ArrayList<Location>();
 
 		final int stageSize = decaySteps.size();

@@ -238,13 +238,13 @@ public class Spleef extends MapGame implements Listener {
 
 		List<Player> toTeleport = new ArrayList<Player>();
 
-		for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+		Bukkit.getServer().getOnlinePlayers().forEach(player -> {
 			if (players.contains(player.getUniqueId())) {
 				toTeleport.add(player);
 			} else {
 				tpToSpectator(player);
 			}
-		}
+		});
 
 		Collections.shuffle(toTeleport);
 
@@ -275,9 +275,7 @@ public class Spleef extends MapGame implements Listener {
 			public void execute() {
 				countdownOver = true;
 
-				for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-					VersionIndependantUtils.get().playSound(player, player.getLocation(), VersionIndependantSound.NOTE_PLING, 1F, 1F);
-				}
+				Bukkit.getServer().getOnlinePlayers().forEach(player -> VersionIndependantUtils.get().playSound(player, player.getLocation(), VersionIndependantSound.NOTE_PLING, 1F, 1F));
 
 				sendBeginEvent();
 			}
@@ -286,12 +284,12 @@ public class Spleef extends MapGame implements Listener {
 		startTimer.addTickCallback(new TickCallback() {
 			@Override
 			public void execute(long timeLeft) {
-				for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+				Bukkit.getServer().getOnlinePlayers().forEach(player -> {
 					VersionIndependantUtils.get().playSound(player, player.getLocation(), VersionIndependantSound.NOTE_PLING, 1F, 1.3F);
 					if (NovaCore.getInstance().getActionBar() != null) {
 						NovaCore.getInstance().getActionBar().sendMessage(player, LanguageManager.getString(player, "novacore.game.starting_in", timeLeft));
 					}
-				}
+				});
 
 				if (NovaCore.getInstance().getActionBar() == null) {
 					LanguageManager.broadcast("novacore.game.starting_in", timeLeft);
@@ -314,10 +312,10 @@ public class Spleef extends MapGame implements Listener {
 		gameLoop = new SimpleTask(new Runnable() {
 			@Override
 			public void run() {
-				for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+				Bukkit.getServer().getOnlinePlayers().forEach(player -> {
 					player.setFoodLevel(20);
 					player.setSaturation(20);
-				}
+				});
 			}
 		}, 20L);
 		gameLoop.start();
@@ -332,8 +330,8 @@ public class Spleef extends MapGame implements Listener {
 
 	public boolean isBlockDecaying(Block block) {
 		if (decayModule != null) {
-			for(Location location : decayModule.getDecayingBlocks().keySet()) {
-				if(LocationUtils.isSameBlock(location, block.getLocation())) {
+			for (Location location : decayModule.getDecayingBlocks().keySet()) {
+				if (LocationUtils.isSameBlock(location, block.getLocation())) {
 					return true;
 				}
 			}
@@ -343,7 +341,7 @@ public class Spleef extends MapGame implements Listener {
 	}
 
 	public boolean canBreakBlock(Block block) {
-		//Log.debug("this.isBlockDecaying(block)", "" + this.isBlockDecaying(block));
+		// Log.debug("this.isBlockDecaying(block)", "" + this.isBlockDecaying(block));
 		if (this.isBlockDecaying(block)) {
 			return true;
 		}

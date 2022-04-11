@@ -141,7 +141,7 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 
 		// Read maps
 		Log.info(getName(), "Loading maps from " + mapFolder.getPath());
-		GameManager.getInstance().loadMaps(mapFolder, worldFolder);
+		GameManager.getInstance().readMapsFromFolder(mapFolder, worldFolder);
 	}
 
 	@Override

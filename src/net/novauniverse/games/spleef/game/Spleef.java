@@ -47,11 +47,11 @@ import net.zeeraa.novacore.commons.utils.Callback;
 import net.zeeraa.novacore.spigot.NovaCore;
 import net.zeeraa.novacore.spigot.abstraction.VersionIndependantUtils;
 import net.zeeraa.novacore.spigot.abstraction.enums.VersionIndependantSound;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.GameEndReason;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.MapGame;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.elimination.PlayerQuitEliminationAction;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.map.mapmodule.MapModule;
 import net.zeeraa.novacore.spigot.language.LanguageManager;
-import net.zeeraa.novacore.spigot.module.modules.game.GameEndReason;
-import net.zeeraa.novacore.spigot.module.modules.game.MapGame;
-import net.zeeraa.novacore.spigot.module.modules.game.elimination.PlayerQuitEliminationAction;
-import net.zeeraa.novacore.spigot.module.modules.game.map.mapmodule.MapModule;
 import net.zeeraa.novacore.spigot.tasks.SimpleTask;
 import net.zeeraa.novacore.spigot.timers.BasicTimer;
 import net.zeeraa.novacore.spigot.utils.ItemBuilder;
@@ -286,16 +286,10 @@ public class Spleef extends MapGame implements Listener {
 			public void execute(long timeLeft) {
 				Bukkit.getServer().getOnlinePlayers().forEach(player -> {
 					VersionIndependantUtils.get().playSound(player, player.getLocation(), VersionIndependantSound.NOTE_PLING, 1F, 1.3F);
-					if (NovaCore.getInstance().getActionBar() != null) {
-						NovaCore.getInstance().getActionBar().sendMessage(player, LanguageManager.getString(player, "novacore.game.starting_in", timeLeft));
-					}
+					VersionIndependantUtils.get().sendActionBarMessage(player, LanguageManager.getString(player, "novacore.game.starting_in", timeLeft));
 				});
+				LanguageManager.broadcast("novacore.game.starting_in", timeLeft);
 
-				if (NovaCore.getInstance().getActionBar() == null) {
-					LanguageManager.broadcast("novacore.game.starting_in", timeLeft);
-				} else {
-					Bukkit.getServer().getConsoleSender().sendMessage(ChatColor.GOLD + "" + ChatColor.BOLD + "Starting in: " + ChatColor.AQUA + ChatColor.BOLD + timeLeft);
-				}
 			}
 		});
 

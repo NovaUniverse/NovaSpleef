@@ -20,15 +20,15 @@ import net.novauniverse.games.spleef.mapmodules.mapdecay.material.NormalSpleefMa
 import net.zeeraa.novacore.commons.utils.RandomGenerator;
 import net.zeeraa.novacore.spigot.abstraction.enums.ColoredBlockType;
 import net.zeeraa.novacore.spigot.abstraction.enums.VersionIndependantSound;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.Game;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.GameManager;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.map.mapmodule.MapModule;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.triggers.DelayedGameTrigger;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.triggers.GameTrigger;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.triggers.RepeatingGameTrigger;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.triggers.TriggerCallback;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.triggers.TriggerFlag;
 import net.zeeraa.novacore.spigot.language.LanguageManager;
-import net.zeeraa.novacore.spigot.module.modules.game.Game;
-import net.zeeraa.novacore.spigot.module.modules.game.GameManager;
-import net.zeeraa.novacore.spigot.module.modules.game.map.mapmodule.MapModule;
-import net.zeeraa.novacore.spigot.module.modules.game.triggers.DelayedGameTrigger;
-import net.zeeraa.novacore.spigot.module.modules.game.triggers.GameTrigger;
-import net.zeeraa.novacore.spigot.module.modules.game.triggers.RepeatingGameTrigger;
-import net.zeeraa.novacore.spigot.module.modules.game.triggers.TriggerCallback;
-import net.zeeraa.novacore.spigot.module.modules.game.triggers.TriggerFlag;
 import net.zeeraa.novacore.spigot.utils.LocationUtils;
 import net.zeeraa.novacore.spigot.utils.VectorArea;
 
@@ -99,7 +99,7 @@ public class SpleefMapDecay extends MapModule {
 		});
 
 		trigger.addFlag(TriggerFlag.STOP_ON_GAME_END);
-
+		
 		startTrigger = new DelayedGameTrigger("novauniverse.spleef.begin_map_decay", beginAfter * 20L, new TriggerCallback() {
 			@Override
 			public void run(GameTrigger trigger2, TriggerFlag reason) {

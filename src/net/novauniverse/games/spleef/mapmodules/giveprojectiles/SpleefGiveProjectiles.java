@@ -11,9 +11,9 @@ import org.json.JSONObject;
 
 import net.zeeraa.novacore.commons.log.Log;
 import net.zeeraa.novacore.commons.tasks.Task;
-import net.zeeraa.novacore.spigot.module.modules.game.Game;
-import net.zeeraa.novacore.spigot.module.modules.game.GameManager;
-import net.zeeraa.novacore.spigot.module.modules.game.map.mapmodule.MapModule;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.Game;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.GameManager;
+import net.zeeraa.novacore.spigot.gameengine.module.modules.game.map.mapmodule.MapModule;
 import net.zeeraa.novacore.spigot.tasks.SimpleTask;
 import net.zeeraa.novacore.spigot.utils.ItemBuilder;
 

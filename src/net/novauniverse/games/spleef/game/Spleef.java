@@ -73,7 +73,7 @@ public class Spleef extends MapGame implements Listener {
 	private SpleefConfigMapModule config;
 
 	private Task gameLoop;
-
+	
 	public Spleef() {
 		super(NovaSpleef.getInstance());
 		this.started = false;
@@ -492,6 +492,9 @@ public class Spleef extends MapGame implements Listener {
 					if (players.contains(e.getPlayer().getUniqueId())) {
 						if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
 							if (canBreakBlock(e.getClickedBlock())) {
+								if(decayModule != null) {
+									decayModule.handleBlockBreak(e.getClickedBlock());
+								}
 								e.getClickedBlock().breakNaturally(NovaCore.getInstance().getVersionIndependentUtils().getItemInMainHand(e.getPlayer()));
 							}
 						}

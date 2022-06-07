@@ -3,3 +3,7 @@ allow_reconnect: true
 player_elimination_delay: 180
 
 enable_easter_egg_lores: true
+
+spawn_teams_in_same_place: false
+
+projectiles_breaks_blocks: true

@@ -33,15 +33,17 @@ import net.zeeraa.novacore.spigot.module.modules.compass.event.CompassTrackingEv
 public class NovaSpleef extends JavaPlugin implements Listener {
 	private static NovaSpleef instance;
 
-	public static NovaSpleef getInstance() {
-		return instance;
-	}
-
 	private boolean allowReconnect;
 	private int reconnectTime;
 	private boolean enableEasterEggLores;
+	private boolean spawnTeamsInSamePlace;
+	private boolean projectilesBreaksBlocks;
 
 	private Spleef game;
+	
+	public static NovaSpleef getInstance() {
+		return instance;
+	}
 
 	public boolean isAllowReconnect() {
 		return allowReconnect;
@@ -50,6 +52,10 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 	public int getReconnectTime() {
 		return reconnectTime;
 	}
+	
+	public boolean isSpawnTeamsInSamePlace() {
+		return spawnTeamsInSamePlace;
+	}
 
 	public Spleef getGame() {
 		return game;
@@ -57,6 +63,10 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 
 	public boolean isEnableEasterEggLores() {
 		return enableEasterEggLores;
+	}
+	
+	public boolean doesProjectilesBreaksBlocks() {
+		return projectilesBreaksBlocks;
 	}
 
 	@Override
@@ -75,6 +85,8 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 		allowReconnect = getConfig().getBoolean("allow_reconnect");
 		reconnectTime = getConfig().getInt("player_elimination_delay");
 		enableEasterEggLores = getConfig().getBoolean("enable_easter_egg_lores");
+		spawnTeamsInSamePlace = getConfig().getBoolean("spawn_teams_in_same_place");
+		projectilesBreaksBlocks = getConfig().getBoolean("projectiles_breaks_blocks");
 
 		// Create files and folders
 		File mapFolder = new File(this.getDataFolder().getPath() + File.separator + "Maps");

@@ -2,7 +2,9 @@ package net.novauniverse.games.spleef.game;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -28,6 +30,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -35,8 +38,9 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-
 import net.novauniverse.games.spleef.NovaSpleef;
 import net.novauniverse.games.spleef.mapmodules.config.SpleefConfigMapModule;
 import net.novauniverse.games.spleef.mapmodules.mapdecay.SpleefMapDecay;
@@ -53,14 +57,17 @@ import net.zeeraa.novacore.spigot.gameengine.module.modules.game.elimination.Pla
 import net.zeeraa.novacore.spigot.gameengine.module.modules.game.map.mapmodule.MapModule;
 import net.zeeraa.novacore.spigot.language.LanguageManager;
 import net.zeeraa.novacore.spigot.tasks.SimpleTask;
+import net.zeeraa.novacore.spigot.teams.Team;
+import net.zeeraa.novacore.spigot.teams.TeamManager;
 import net.zeeraa.novacore.spigot.timers.BasicTimer;
 import net.zeeraa.novacore.spigot.utils.ItemBuilder;
 import net.zeeraa.novacore.spigot.utils.LocationUtils;
 import net.zeeraa.novacore.spigot.utils.PlayerUtils;
+import net.zeeraa.novacore.spigot.utils.ProjectileUtils;
 import net.zeeraa.novacore.spigot.utils.RandomFireworkEffect;
 
 public class Spleef extends MapGame implements Listener {
-	public static final String[] TOOL_LORE_EASER_EGGS = { "IKEA\nSANDIG 20:-\nSpade, blå\n16:- exkl. moms\nUtgår inom kort\n\n\nHey how do i remove\nthe price tag from this?", "Zeeraa Approved!", "Try not to fall into the lava" };
+	public static final String[] TOOL_LORE_EASTER_EGGS = { "IKEA\nSANDIG 20:-\nSpade, blå\n16:- exkl. moms\nUtgår inom kort\n\n\nHey how do i remove\nthe price tag from this?", "Zeeraa Approved!", "Try not to fall into the lava" };
 
 	private boolean started;
 	private boolean ended;
@@ -73,7 +80,9 @@ public class Spleef extends MapGame implements Listener {
 	private SpleefConfigMapModule config;
 
 	private Task gameLoop;
-	
+
+	private Map<Team, Location> teamSpawnLocations;
+
 	public Spleef() {
 		super(NovaSpleef.getInstance());
 		this.started = false;
@@ -81,6 +90,7 @@ public class Spleef extends MapGame implements Listener {
 		this.config = null;
 		this.countdownOver = false;
 		this.decayModule = null;
+		this.teamSpawnLocations = new HashMap<>();
 	}
 
 	public SpleefConfigMapModule getConfig() {
@@ -145,6 +155,7 @@ public class Spleef extends MapGame implements Listener {
 		NovaCore.getInstance().getVersionIndependentUtils().resetEntityMaxHealth(player);
 		player.setHealth(20);
 		player.setGameMode(GameMode.SPECTATOR);
+		player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 100000, 0, false, false));
 		if (hasActiveMap()) {
 			player.teleport(getActiveMap().getSpectatorLocation());
 		}
@@ -172,7 +183,7 @@ public class Spleef extends MapGame implements Listener {
 		if (NovaSpleef.getInstance().isEnableEasterEggLores()) {
 			Random random = new Random();
 			if (random.nextInt(4) == 1) {
-				String selected = TOOL_LORE_EASER_EGGS[random.nextInt(TOOL_LORE_EASER_EGGS.length)];
+				String selected = TOOL_LORE_EASTER_EGGS[random.nextInt(TOOL_LORE_EASTER_EGGS.length)];
 
 				ItemMeta toolMeta = tool.getItemMeta();
 				List<String> lore;
@@ -266,7 +277,28 @@ public class Spleef extends MapGame implements Listener {
 				return;
 			}
 
-			tpToArena(toTeleport.remove(0), toUse.remove(0));
+			Player player = toTeleport.remove(0);
+
+			Location location = null;
+			if (NovaSpleef.getInstance().isSpawnTeamsInSamePlace()) {
+				if (TeamManager.hasTeamManager()) {
+					Team team = TeamManager.getTeamManager().getPlayerTeam(player);
+					if (team != null) {
+						if (teamSpawnLocations.containsKey(team)) {
+							location = teamSpawnLocations.get(team);
+						} else {
+							location = toUse.remove(0);
+							teamSpawnLocations.put(team, location);
+						}
+					}
+				}
+			}
+
+			if (location == null) {
+				location = toUse.remove(0);
+			}
+
+			tpToArena(player, location);
 		}
 
 		BasicTimer startTimer = new BasicTimer(countdownTime, 20L);
@@ -357,7 +389,7 @@ public class Spleef extends MapGame implements Listener {
 
 		Task.tryStopTask(gameLoop);
 
-		for (Location location : getActiveMap().getStarterLocations()) {
+		getActiveMap().getStarterLocations().forEach(location -> {
 			Firework fw = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK);
 			FireworkMeta fwm = fw.getFireworkMeta();
 
@@ -365,18 +397,35 @@ public class Spleef extends MapGame implements Listener {
 			fwm.addEffect(RandomFireworkEffect.randomFireworkEffect());
 
 			fw.setFireworkMeta(fwm);
-		}
+		});
 
-		for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-			p.setHealth(p.getMaxHealth());
-			p.setFoodLevel(20);
-			PlayerUtils.clearPlayerInventory(p);
-			PlayerUtils.resetPlayerXP(p);
-			p.setGameMode(GameMode.SPECTATOR);
-			VersionIndependantUtils.get().playSound(p, p.getLocation(), VersionIndependantSound.WITHER_DEATH, 1F, 1F);
-		}
+		Bukkit.getServer().getOnlinePlayers().forEach(player -> {
+			player.setFoodLevel(20);
+			PlayerUtils.resetMaxHealth(player);
+			PlayerUtils.clearPlayerInventory(player);
+			PlayerUtils.resetPlayerXP(player);
+			player.setGameMode(GameMode.SPECTATOR);
+			VersionIndependantUtils.get().playSound(player, player.getLocation(), VersionIndependantSound.WITHER_DEATH, 1F, 1F);
+		});
 
 		ended = true;
+	}
+
+	@EventHandler(priority = EventPriority.NORMAL)
+	public void onProjectileHit(ProjectileHitEvent e) {
+		if (NovaSpleef.getInstance().doesProjectilesBreaksBlocks()) {
+			if (hasStarted()) {
+				if (countdownOver) {
+					Block block = ProjectileUtils.getEstimatedHitBlock(e.getEntity());
+					if (canBreakBlock(block)) {
+						if (decayModule != null) {
+							decayModule.handleBlockBreak(block);
+						}
+						block.breakNaturally();
+					}
+				}
+			}
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -492,7 +541,7 @@ public class Spleef extends MapGame implements Listener {
 					if (players.contains(e.getPlayer().getUniqueId())) {
 						if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
 							if (canBreakBlock(e.getClickedBlock())) {
-								if(decayModule != null) {
+								if (decayModule != null) {
 									decayModule.handleBlockBreak(e.getClickedBlock());
 								}
 								e.getClickedBlock().breakNaturally(NovaCore.getInstance().getVersionIndependentUtils().getItemInMainHand(e.getPlayer()));

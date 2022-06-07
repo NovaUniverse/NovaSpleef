@@ -257,7 +257,7 @@ public class Spleef extends MapGame implements Listener {
 			}
 		});
 
-		Collections.shuffle(toTeleport);
+		Collections.shuffle(toTeleport, getRandom());
 
 		List<Location> toUse = new ArrayList<Location>();
 		while (toTeleport.size() > 0) {
@@ -266,7 +266,7 @@ public class Spleef extends MapGame implements Listener {
 					toUse.add(location);
 				}
 
-				Collections.shuffle(toUse);
+				Collections.shuffle(toUse, getRandom());
 			}
 
 			if (toUse.size() == 0) {

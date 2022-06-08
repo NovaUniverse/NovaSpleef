@@ -49,8 +49,8 @@ import net.zeeraa.novacore.commons.tasks.Task;
 import net.zeeraa.novacore.commons.timers.TickCallback;
 import net.zeeraa.novacore.commons.utils.Callback;
 import net.zeeraa.novacore.spigot.NovaCore;
-import net.zeeraa.novacore.spigot.abstraction.VersionIndependantUtils;
-import net.zeeraa.novacore.spigot.abstraction.enums.VersionIndependantSound;
+import net.zeeraa.novacore.spigot.abstraction.VersionIndependentUtils;
+import net.zeeraa.novacore.spigot.abstraction.enums.VersionIndependentSound;
 import net.zeeraa.novacore.spigot.gameengine.module.modules.game.GameEndReason;
 import net.zeeraa.novacore.spigot.gameengine.module.modules.game.MapGame;
 import net.zeeraa.novacore.spigot.gameengine.module.modules.game.elimination.PlayerQuitEliminationAction;
@@ -307,7 +307,7 @@ public class Spleef extends MapGame implements Listener {
 			public void execute() {
 				countdownOver = true;
 
-				Bukkit.getServer().getOnlinePlayers().forEach(player -> VersionIndependantUtils.get().playSound(player, player.getLocation(), VersionIndependantSound.NOTE_PLING, 1F, 1F));
+				Bukkit.getServer().getOnlinePlayers().forEach(player -> VersionIndependentUtils.get().playSound(player, player.getLocation(), VersionIndependentSound.NOTE_PLING, 1F, 1F));
 
 				sendBeginEvent();
 			}
@@ -317,8 +317,8 @@ public class Spleef extends MapGame implements Listener {
 			@Override
 			public void execute(long timeLeft) {
 				Bukkit.getServer().getOnlinePlayers().forEach(player -> {
-					VersionIndependantUtils.get().playSound(player, player.getLocation(), VersionIndependantSound.NOTE_PLING, 1F, 1.3F);
-					VersionIndependantUtils.get().sendActionBarMessage(player, LanguageManager.getString(player, "novacore.game.starting_in", timeLeft));
+					VersionIndependentUtils.get().playSound(player, player.getLocation(), VersionIndependentSound.NOTE_PLING, 1F, 1.3F);
+					VersionIndependentUtils.get().sendActionBarMessage(player, LanguageManager.getString(player, "novacore.game.starting_in", timeLeft));
 				});
 				LanguageManager.broadcast("novacore.game.starting_in", timeLeft);
 
@@ -405,7 +405,7 @@ public class Spleef extends MapGame implements Listener {
 			PlayerUtils.clearPlayerInventory(player);
 			PlayerUtils.resetPlayerXP(player);
 			player.setGameMode(GameMode.SPECTATOR);
-			VersionIndependantUtils.get().playSound(player, player.getLocation(), VersionIndependantSound.WITHER_DEATH, 1F, 1F);
+			VersionIndependentUtils.get().playSound(player, player.getLocation(), VersionIndependentSound.WITHER_DEATH, 1F, 1F);
 		});
 
 		ended = true;

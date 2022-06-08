@@ -26,7 +26,7 @@ import net.novauniverse.games.spleef.mapmodules.mapdecay.material.NormalSpleefMa
 import net.zeeraa.novacore.commons.log.Log;
 import net.zeeraa.novacore.commons.utils.RandomGenerator;
 import net.zeeraa.novacore.spigot.abstraction.enums.ColoredBlockType;
-import net.zeeraa.novacore.spigot.abstraction.enums.VersionIndependantSound;
+import net.zeeraa.novacore.spigot.abstraction.enums.VersionIndependentSound;
 import net.zeeraa.novacore.spigot.gameengine.module.modules.game.Game;
 import net.zeeraa.novacore.spigot.gameengine.module.modules.game.GameManager;
 import net.zeeraa.novacore.spigot.gameengine.module.modules.game.map.mapmodule.MapModule;
@@ -130,7 +130,7 @@ public class SpleefMapDecay extends MapModule implements Listener {
 		startTrigger = new DelayedGameTrigger("novauniverse.spleef.begin_map_decay", beginAfter * 20L, new TriggerCallback() {
 			@Override
 			public void run(GameTrigger trigger2, TriggerFlag reason) {
-				Bukkit.getServer().getOnlinePlayers().forEach(player -> VersionIndependantSound.NOTE_PLING.play(player, player.getLocation(), 1F, 1F));
+				Bukkit.getServer().getOnlinePlayers().forEach(player -> VersionIndependentSound.NOTE_PLING.play(player, player.getLocation(), 1F, 1F));
 
 				LanguageManager.broadcast("spleef.begin_decay");
 

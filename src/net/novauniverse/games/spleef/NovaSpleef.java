@@ -38,6 +38,8 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 	private boolean enableEasterEggLores;
 	private boolean spawnTeamsInSamePlace;
 	private boolean projectilesBreaksBlocks;
+	
+	private boolean disableDefaultEndSound;
 
 	private Spleef game;
 	
@@ -68,6 +70,14 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 	public boolean doesProjectilesBreaksBlocks() {
 		return projectilesBreaksBlocks;
 	}
+	
+	public boolean isDisableDefaultEndSound() {
+		return disableDefaultEndSound;
+	}
+	
+	public void setDisableDefaultEndSound(boolean disableDefaultEndSound) {
+		this.disableDefaultEndSound = disableDefaultEndSound;
+	}
 
 	@Override
 	public void onEnable() {
@@ -87,6 +97,8 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 		enableEasterEggLores = getConfig().getBoolean("enable_easter_egg_lores");
 		spawnTeamsInSamePlace = getConfig().getBoolean("spawn_teams_in_same_place");
 		projectilesBreaksBlocks = getConfig().getBoolean("projectiles_breaks_blocks");
+		
+		disableDefaultEndSound = getConfig().getBoolean("disable_default_end_sound");
 
 		// Create files and folders
 		File mapFolder = new File(this.getDataFolder().getPath() + File.separator + "Maps");

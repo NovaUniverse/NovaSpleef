@@ -7,3 +7,6 @@ enable_easter_egg_lores: true
 spawn_teams_in_same_place: false
 
 projectiles_breaks_blocks: true
+
+# Set to true to not play the wither death sound on end
+disable_default_end_sound: true

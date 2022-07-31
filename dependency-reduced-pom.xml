@@ -82,12 +82,8 @@
   </build>
   <repositories>
     <repository>
-      <id>spigot-repo</id>
-      <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-    </repository>
-    <repository>
-      <id>novauniverse-group</id>
-      <url>https://nexus.novauniverse.net/repository/novauniverse-group/</url>
+      <id>novauniverse2</id>
+      <url>https://nexus2.novauniverse.net/repository/craftbukkit/</url>
     </repository>
   </repositories>
   <dependencies>
@@ -112,12 +108,12 @@
   </dependencies>
   <distributionManagement>
     <repository>
-      <id>novauniverse</id>
-      <url>https://nexus.novauniverse.net/repository/novauniverse/</url>
+      <id>novauniverse2</id>
+      <url>https://nexus2.novauniverse.net/repository/craftbukkit/</url>
     </repository>
     <snapshotRepository>
-      <id>novauniverse</id>
-      <url>https://nexus.novauniverse.net/repository/novauniverse/</url>
+      <id>novauniverse2-snapshot</id>
+      <url>https://nexus2.novauniverse.net/repository/craftbukkit/</url>
     </snapshotRepository>
   </distributionManagement>
   <properties>

@@ -83,7 +83,7 @@
   <repositories>
     <repository>
       <id>novauniverse2</id>
-      <url>https://nexus2.novauniverse.net/repository/craftbukkit/</url>
+      <url>https://nexus2.novauniverse.net/repository/novauniverse-group/</url>
     </repository>
   </repositories>
   <dependencies>

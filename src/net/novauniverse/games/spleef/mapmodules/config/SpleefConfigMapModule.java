@@ -21,12 +21,21 @@ public class SpleefConfigMapModule extends MapModule {
 	private Material toolMaterial;
 	private Map<Enchantment, Integer> toolEnchants;
 
+	private boolean projectileBreakBlocks;
+
 	public SpleefConfigMapModule(JSONObject json) {
 		super(json);
 
 		toolEnchants = new HashMap<>();
 
 		breakableBlocks = new ArrayList<>();
+
+		projectileBreakBlocks = true;
+
+		if (json.has("projectile_breaks_blocks")) {
+			projectileBreakBlocks = json.getBoolean("projectile_breaks_blocks");
+		}
+
 		if (json.has("breakable_blocks")) {
 			JSONArray breakableBlocksJson = json.getJSONArray("breakable_blocks");
 			for (int i = 0; i < breakableBlocksJson.length(); i++) {
@@ -85,6 +94,10 @@ public class SpleefConfigMapModule extends MapModule {
 
 	public List<Material> getBreakableBlocks() {
 		return breakableBlocks;
+	}
+
+	public boolean isProjectileBreakBlocks() {
+		return projectileBreakBlocks;
 	}
 
 	public ItemStack getToolItemStack() {

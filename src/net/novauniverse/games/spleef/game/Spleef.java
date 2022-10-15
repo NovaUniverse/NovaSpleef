@@ -418,12 +418,14 @@ public class Spleef extends MapGame implements Listener {
 		if (NovaSpleef.getInstance().doesProjectilesBreaksBlocks()) {
 			if (hasStarted()) {
 				if (countdownOver) {
-					Block block = ProjectileUtils.getEstimatedHitBlock(e.getEntity());
-					if (canBreakBlock(block)) {
-						if (decayModule != null) {
-							decayModule.handleBlockBreak(block);
+					if (config.isProjectileBreakBlocks()) {
+						Block block = ProjectileUtils.getEstimatedHitBlock(e.getEntity());
+						if (canBreakBlock(block)) {
+							if (decayModule != null) {
+								decayModule.handleBlockBreak(block);
+							}
+							block.breakNaturally();
 						}
-						block.breakNaturally();
 					}
 				}
 			}

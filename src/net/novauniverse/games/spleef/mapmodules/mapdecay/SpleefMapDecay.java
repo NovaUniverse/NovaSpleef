@@ -126,6 +126,7 @@ public class SpleefMapDecay extends MapModule implements Listener {
 
 		trigger.addFlag(TriggerFlag.STOP_ON_GAME_END);
 		trigger.addFlag(TriggerFlag.DISABLE_LOGGING);
+		trigger.setDescription("Runns a decay step in spleef");
 
 		startTrigger = new DelayedGameTrigger("novauniverse.spleef.begin_map_decay", beginAfter * 20L, new TriggerCallback() {
 			@Override
@@ -140,6 +141,7 @@ public class SpleefMapDecay extends MapModule implements Listener {
 
 		startTrigger.addFlag(TriggerFlag.STOP_ON_GAME_END);
 		startTrigger.addFlag(TriggerFlag.RUN_ONLY_ONCE);
+		startTrigger.setDescription("Starts the map decay");
 	}
 
 	public boolean isPlayerDecay() {
@@ -214,12 +216,12 @@ public class SpleefMapDecay extends MapModule implements Listener {
 	public void onGameEnd(Game game) {
 		HandlerList.unregisterAll(this);
 	}
-	
+
 	public void handleBlockBreak(Block block) {
-		//Log.trace("Block break on " + block.getLocation());
+		// Log.trace("Block break on " + block.getLocation());
 		for (List<Location> singleFloor : floorBlocks) {
 			if (singleFloor.contains(block.getLocation())) {
-				//Log.trace("Removing block " + block.getLocation() + " from floor list");
+				// Log.trace("Removing block " + block.getLocation() + " from floor list");
 				singleFloor.remove(block.getLocation());
 				break;
 			}

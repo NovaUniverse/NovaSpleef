@@ -39,11 +39,11 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 	private boolean enableEasterEggLores;
 	private boolean spawnTeamsInSamePlace;
 	private boolean projectilesBreaksBlocks;
-	
+
 	private boolean disableDefaultEndSound;
 
 	private Spleef game;
-	
+
 	public static NovaSpleef getInstance() {
 		return instance;
 	}
@@ -55,7 +55,7 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 	public int getReconnectTime() {
 		return reconnectTime;
 	}
-	
+
 	public boolean isSpawnTeamsInSamePlace() {
 		return spawnTeamsInSamePlace;
 	}
@@ -67,15 +67,15 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 	public boolean isEnableEasterEggLores() {
 		return enableEasterEggLores;
 	}
-	
+
 	public boolean doesProjectilesBreaksBlocks() {
 		return projectilesBreaksBlocks;
 	}
-	
+
 	public boolean isDisableDefaultEndSound() {
 		return disableDefaultEndSound;
 	}
-	
+
 	public void setDisableDefaultEndSound(boolean disableDefaultEndSound) {
 		this.disableDefaultEndSound = disableDefaultEndSound;
 	}
@@ -98,18 +98,16 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 		enableEasterEggLores = getConfig().getBoolean("enable_easter_egg_lores");
 		spawnTeamsInSamePlace = getConfig().getBoolean("spawn_teams_in_same_place");
 		projectilesBreaksBlocks = getConfig().getBoolean("projectiles_breaks_blocks");
-		
+
 		disableDefaultEndSound = getConfig().getBoolean("disable_default_end_sound");
 
 		// Create files and folders
 		File mapFolder = new File(this.getDataFolder().getPath() + File.separator + "Maps");
 		File worldFolder = new File(this.getDataFolder().getPath() + File.separator + "Worlds");
-		
-
 
 		if (NovaCoreGameEngine.getInstance().getRequestedGameDataDirectory() != null) {
-			mapFolder = new File(NovaCoreGameEngine.getInstance().getRequestedGameDataDirectory().getAbsolutePath() + File.separator + getName() + File.separator + "Maps");
-			worldFolder = new File(NovaCoreGameEngine.getInstance().getRequestedGameDataDirectory().getAbsolutePath() + File.separator + getName() + File.separator + "Worlds");
+			mapFolder = new File(NovaCoreGameEngine.getInstance().getRequestedGameDataDirectory().getAbsolutePath() + File.separator + "Spleef" + File.separator + "Maps");
+			worldFolder = new File(NovaCoreGameEngine.getInstance().getRequestedGameDataDirectory().getAbsolutePath() + File.separator + "Spleef" + File.separator + "Worlds");
 		}
 
 		File mapOverrides = new File(this.getDataFolder().getPath() + File.separator + "map_overrides.json");

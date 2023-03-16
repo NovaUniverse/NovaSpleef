@@ -2,6 +2,7 @@ package net.novauniverse.games.spleef;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
@@ -18,6 +19,8 @@ import net.novauniverse.games.spleef.game.Spleef;
 import net.novauniverse.games.spleef.mapmodules.config.SpleefConfigMapModule;
 import net.novauniverse.games.spleef.mapmodules.giveprojectiles.SpleefGiveProjectiles;
 import net.novauniverse.games.spleef.mapmodules.mapdecay.SpleefMapDecay;
+import net.novauniverse.games.spleef.modules.snowballvote.SnowballVoteSelectorItem;
+import net.novauniverse.games.spleef.modules.snowballvote.SpleefSnowballVoteManager;
 import net.zeeraa.novacore.commons.log.Log;
 import net.zeeraa.novacore.commons.utils.JSONFileUtils;
 import net.zeeraa.novacore.spigot.abstraction.events.VersionIndependentPlayerAchievementAwardedEvent;
@@ -30,6 +33,8 @@ import net.zeeraa.novacore.spigot.language.LanguageReader;
 import net.zeeraa.novacore.spigot.module.ModuleManager;
 import net.zeeraa.novacore.spigot.module.modules.compass.CompassTracker;
 import net.zeeraa.novacore.spigot.module.modules.compass.event.CompassTrackingEvent;
+import net.zeeraa.novacore.spigot.module.modules.customitems.CustomItemManager;
+import net.zeeraa.novacore.spigot.module.modules.gui.GUIManager;
 
 public class NovaSpleef extends JavaPlugin implements Listener {
 	private static NovaSpleef instance;
@@ -39,8 +44,8 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 	private boolean enableEasterEggLores;
 	private boolean spawnTeamsInSamePlace;
 	private boolean projectilesBreaksBlocks;
-
 	private boolean disableDefaultEndSound;
+	private boolean snowballVotingEnabled;
 
 	private Spleef game;
 
@@ -80,6 +85,10 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 		this.disableDefaultEndSound = disableDefaultEndSound;
 	}
 
+	public boolean isSnowballVotingEnabled() {
+		return snowballVotingEnabled;
+	}
+
 	@Override
 	public void onEnable() {
 		NovaSpleef.instance = this;
@@ -92,6 +101,8 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		snowballVotingEnabled = false;
 
 		allowReconnect = getConfig().getBoolean("allow_reconnect");
 		reconnectTime = getConfig().getInt("player_elimination_delay");
@@ -141,6 +152,23 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 			return;
 		}
 
+		// Load modules
+		ModuleManager.loadModule(this, SpleefSnowballVoteManager.class, false);
+
+		// Enable required modules
+		ModuleManager.enable(GameManager.class);
+		ModuleManager.enable(GameLobby.class);
+		ModuleManager.enable(CompassTracker.class);
+		ModuleManager.enable(GUIManager.class);
+		ModuleManager.enable(CustomItemManager.class);
+
+		// Custom items
+		try {
+			CustomItemManager.getInstance().addCustomItem(SnowballVoteSelectorItem.class);
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			e.printStackTrace();
+		}
+
 		// Register map modules
 		MapModuleManager.addMapModule("spleef.config", SpleefConfigMapModule.class);
 		MapModuleManager.addMapModule("spleef.add_projectiles", SpleefGiveProjectiles.class);
@@ -148,13 +176,13 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 		// MapModuleManager.addMapModule("spleef.projectile_break_blocks",
 		// ProjectilesBreakBlocks.class);
 
-		// Enable required modules
-		ModuleManager.enable(GameManager.class);
-		ModuleManager.enable(GameLobby.class);
-		ModuleManager.enable(CompassTracker.class);
-
 		// All players have compasses so strict mode is not needed
 		CompassTracker.getInstance().setStrictMode(false);
+
+		if (getConfig().getBoolean("snowball_voting")) {
+			ModuleManager.enable(SpleefSnowballVoteManager.class);
+			snowballVotingEnabled = true;
+		}
 
 		// Init game and maps
 		this.game = new Spleef();

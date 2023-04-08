@@ -117,11 +117,8 @@ public class SpleefMapDecay extends MapModule implements Listener {
 		beginAfter = json.getInt("begin_after");
 		attemptsPerFloor = json.getInt("attempts_per_floor");
 
-		trigger = new RepeatingGameTrigger("novauniverse.spleef.map_decay", 20L, 20L, new TriggerCallback() {
-			@Override
-			public void run(GameTrigger trigger2, TriggerFlag reason) {
-				decay();
-			}
+		trigger = new RepeatingGameTrigger("novauniverse.spleef.map_decay", 20L, 20L, (GameTrigger trigger2, TriggerFlag reason) -> {
+			decay();
 		});
 
 		trigger.addFlag(TriggerFlag.STOP_ON_GAME_END);

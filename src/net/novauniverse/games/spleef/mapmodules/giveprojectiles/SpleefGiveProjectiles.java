@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.json.JSONObject;
 
 import net.novauniverse.games.spleef.NovaSpleef;
+import net.novauniverse.games.spleef.game.Spleef;
 import net.novauniverse.games.spleef.modules.snowballvote.SpleefSnowballVoteManager;
 import net.zeeraa.novacore.commons.log.Log;
 import net.zeeraa.novacore.commons.tasks.Task;
@@ -69,6 +70,10 @@ public class SpleefGiveProjectiles extends MapModule {
 						if (!ModuleManager.getModule(SpleefSnowballVoteManager.class).isShouldGiveSnowballs()) {
 							return;
 						}
+					}
+				} else {
+					if(!NovaSpleef.getInstance().isShouldGiveSnowballs()) {
+						return;
 					}
 				}
 

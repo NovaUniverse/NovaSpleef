@@ -12,3 +12,6 @@ projectiles_breaks_blocks: true
 disable_default_end_sound: true
 
 snowball_voting: true
+
+# This wont affect anything if snowball voting is enabled
+give_snowballs: true

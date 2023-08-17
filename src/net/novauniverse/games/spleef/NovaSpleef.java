@@ -46,6 +46,7 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 	private boolean projectilesBreaksBlocks;
 	private boolean disableDefaultEndSound;
 	private boolean snowballVotingEnabled;
+	private boolean shouldGiveSnowballs;
 
 	private Spleef game;
 
@@ -89,6 +90,10 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 		return snowballVotingEnabled;
 	}
 
+	public boolean isShouldGiveSnowballs() {
+		return shouldGiveSnowballs;
+	}
+
 	@Override
 	public void onEnable() {
 		NovaSpleef.instance = this;
@@ -111,6 +116,8 @@ public class NovaSpleef extends JavaPlugin implements Listener {
 		projectilesBreaksBlocks = getConfig().getBoolean("projectiles_breaks_blocks");
 
 		disableDefaultEndSound = getConfig().getBoolean("disable_default_end_sound");
+
+		shouldGiveSnowballs = getConfig().getBoolean("give_snowballs");
 
 		// Create files and folders
 		File mapFolder = new File(this.getDataFolder().getPath() + File.separator + "Maps");

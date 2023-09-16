@@ -48,6 +48,8 @@ public class SpleefMapDecay extends MapModule implements Listener {
 
 	private List<List<Location>> floorBlocks;
 
+	private boolean noDecayMessage;
+
 	public List<List<Location>> getFloorBlocks() {
 		return floorBlocks;
 	}
@@ -94,6 +96,8 @@ public class SpleefMapDecay extends MapModule implements Listener {
 			mode = DecayMode.valueOf(json.getString("mode"));
 		}
 		Log.info("SpleefMapDecay", "Mode: " + mode.name());
+		
+		noDecayMessage = json.optBoolean("no_decay_message", false);
 
 		JSONArray floorBlocksJson = json.getJSONArray("floor_blocks");
 		for (int i = 0; i < floorBlocksJson.length(); i++) {
@@ -128,9 +132,11 @@ public class SpleefMapDecay extends MapModule implements Listener {
 		startTrigger = new DelayedGameTrigger("novauniverse.spleef.begin_map_decay", beginAfter * 20L, new TriggerCallback() {
 			@Override
 			public void run(GameTrigger trigger2, TriggerFlag reason) {
-				Bukkit.getServer().getOnlinePlayers().forEach(player -> VersionIndependentSound.NOTE_PLING.play(player, player.getLocation(), 1F, 1F));
+				if (!noDecayMessage) {
+					Bukkit.getServer().getOnlinePlayers().forEach(player -> VersionIndependentSound.NOTE_PLING.play(player, player.getLocation(), 1F, 1F));
 
-				LanguageManager.broadcast("spleef.begin_decay");
+					LanguageManager.broadcast("spleef.begin_decay");
+				}
 
 				trigger.start();
 			}

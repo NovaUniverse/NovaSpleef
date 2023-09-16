@@ -6,7 +6,6 @@ import org.bukkit.inventory.ItemStack;
 import org.json.JSONObject;
 
 import net.novauniverse.games.spleef.NovaSpleef;
-import net.novauniverse.games.spleef.game.Spleef;
 import net.novauniverse.games.spleef.modules.snowballvote.SpleefSnowballVoteManager;
 import net.zeeraa.novacore.commons.log.Log;
 import net.zeeraa.novacore.commons.tasks.Task;

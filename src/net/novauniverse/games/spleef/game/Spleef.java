@@ -9,6 +9,7 @@ import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Difficulty;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -60,6 +61,7 @@ import net.zeeraa.novacore.spigot.tasks.SimpleTask;
 import net.zeeraa.novacore.spigot.teams.Team;
 import net.zeeraa.novacore.spigot.teams.TeamManager;
 import net.zeeraa.novacore.spigot.timers.BasicTimer;
+import net.zeeraa.novacore.spigot.utils.ChatColorRGBMapper;
 import net.zeeraa.novacore.spigot.utils.ItemBuilder;
 import net.zeeraa.novacore.spigot.utils.LocationUtils;
 import net.zeeraa.novacore.spigot.utils.PlayerUtils;
@@ -204,6 +206,18 @@ public class Spleef extends MapGame implements Listener {
 
 		player.getInventory().setItem(8, Spleef.getTrackingCompassItem());
 		player.getInventory().setItem(0, tool);
+		
+		Color color = Color.WHITE;
+		if (TeamManager.hasTeamManager()) {
+			Team team = TeamManager.getTeamManager().getPlayerTeam(player);
+			if (team != null) {
+				color = ChatColorRGBMapper.chatColorToRGBColorData(team.getTeamColor()).toBukkitColor();
+			}
+		}
+
+		player.getInventory().setChestplate(new ItemBuilder(Material.LEATHER_CHESTPLATE).setLeatherArmorColor(color).build());
+		player.getInventory().setLeggings(new ItemBuilder(Material.LEATHER_LEGGINGS).setLeatherArmorColor(color).build());
+		player.getInventory().setBoots(new ItemBuilder(Material.LEATHER_BOOTS).setLeatherArmorColor(color).build());
 
 		new BukkitRunnable() {
 			@Override
